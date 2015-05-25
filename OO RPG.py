@@ -62,6 +62,7 @@ def print_map():
     special = {}
     for item in Character:
         special[item.position] = item.rep_char # need to review the syntax of how this works
+    print
     for row in range(9):
         for column in range(8):
             if (row, column) in map:
@@ -74,52 +75,65 @@ def print_map():
     print("")
 
 def User_Interface(): # requests a move command from the user, then prints all objects current positions
+    import os
+    os.system('cls') # will clear the screen between turns.
+
     print_map()
 
-    x = raw_input("Which direction would you like to move in? <N E S W> : ")
+    global prompt # will be determined by user choice, handed to Control Loop for feedback in screen printout
+
+    print(prompt)
+    print
+
+    x = raw_input("Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining) :")
     x = x.upper() # input will accept upper or lower case valid directions
     print
     if x == 'N':
         if not (hero.position[0] - 1, hero.position[1]) in map:
             hero.position = (hero.position[0] - 1, hero.position[1])
+            prompt = "You moved."
         else:
-            print("There must be a wall there. Lose a turn.")
+            prompt = "There must be a wall there. Lose a turn."
             print
     elif x == 'S':
         if not (hero.position[0] + 1, hero.position[1]) in map:
             hero.position = (hero.position[0] + 1, hero.position[1])
+            prompt = "You moved."
         else:
-            print("There must be a wall there. Lose a turn.")
+            prompt = "There must be a wall there. Lose a turn."
             print
     elif x == 'E':
         if not (hero.position[0], hero.position[1] + 1) in map:
             hero.position = (hero.position[0], hero.position[1] + 1)
+            prompt = "You moved."
         else:
-            print("There must be a wall there. Lose a turn.")
+            prompt = "There must be a wall there. Lose a turn."
             print
     elif x == 'W':
         if not (hero.position[0], hero.position[1] - 1) in map:
             hero.position = (hero.position[0], hero.position[1] - 1)
+            prompt = "You moved."
         else:
-            print("There must be a wall there. Lose a turn.")
+            prompt = "There must be a wall there. Lose a turn."
             print
     else:
-        print("Can't follow instructions? Lose a turn.")
+        prompt = "Can't follow instructions? Lose a turn."
         print
 
     print_map()
 
 turn_count = 4 # Behind the scenes turn count control
 
-def Control_Loop():
+prompt = "first turn, good luck!"
+
+def Control_Loop(): #relies on and counts down the turn_count
     global turn_count
     while turn_count > 0:
         User_Interface()
         turn_count -= 1
-        print(turn_count, " left")
-        print
     else:
-        print("You are out of turns")
+        print("You are out of turns.")
+        raw_input("Press Enter to close game.")
 
 Control_Loop() # will begin the program
 
