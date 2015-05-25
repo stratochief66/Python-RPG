@@ -74,6 +74,8 @@ def print_map():
     print("")
 
 def User_Interface(): # requests a move command from the user, then prints all objects current positions
+    print_map()
+
     x = raw_input("Which direction would you like to move in? <N E S W> : ")
     x = x.upper() # input will accept upper or lower case valid directions
     print
@@ -107,16 +109,17 @@ def User_Interface(): # requests a move command from the user, then prints all o
 
     print_map()
 
-turn_count = 3 # test, forced definition of turn limit
+turn_count = 4 # Behind the scenes turn count control
 
-def Looping_Test():
+def Control_Loop():
     global turn_count
     while turn_count > 0:
         User_Interface()
         turn_count -= 1
         print(turn_count, " left")
+        print
+    else:
+        print("You are out of turns")
 
-print_map() # print the map for the first time, may be reducable by changing the order in UI
-
-Looping_Test()
+Control_Loop() # will begin the program
 
