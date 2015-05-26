@@ -16,7 +16,7 @@ class Character(object):
     __metaclass__ = IterRegistry
     _registry = []
 
-    empCount = 0
+    entityCount = 0
 
     def __init__(self, name, rep_char, health = 100, strength = 2, view_range = 2):
         self._registry.append(self)
@@ -27,15 +27,15 @@ class Character(object):
         self.rep_char = rep_char
         self.xp = 0
         self.position = (4,1)
-        self.number = Character.empCount
+        self.number = Character.entityCount
 
-        Character.empCount += 1
+        Character.entityCount += 1
 
     def display_stats(self):
         return "This person/object is %s with %s health and represented by %s" % (self.name, self.health, self.rep_char)
 
 class Monster(Character): # subclass of Character. inherits from Character.
-    def __init__(self, name, health = 20, strength = 1, view_range = 2, rep_char = 'm'):
+    def __init__(self, name, health = 20, strength = 1, view_range = 2, rep_char = 'b'): # defaults will create a bat
         self._registry.append(self)
         self.name = name
         self.health = health
@@ -44,9 +44,9 @@ class Monster(Character): # subclass of Character. inherits from Character.
         self.rep_char = rep_char
         self.xp = False
         self.position = (4,4)
-        self.number = Character.empCount
+        self.number = Character.entityCount
 
-        Character.empCount += 1
+        Character.entityCount += 1
 
 map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7), (2,0), (2,7), (3,0), (3,1), (3,3), (3,4), (3,5), (3,7),
     (4,0), (4,3), (4,7), (5,0), (5,1), (5,3), (5,4), (5,5), (5,7), (6,0), (6, 7), (7,0), (7,7), (8,0), (8,1), (8,2), (8,3),
@@ -57,6 +57,9 @@ map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7), (2,
 
 hero = Character("Kyle", 'K', 100, 2, 4) # overrides the default view range, confirms the other properties.
 bat = Monster("bat")
+dragon = Monster("dragon", 200, 5, 3, rep_char = 'd')
+dragon.position = (4,5)
+# may later include position in declaration parameters, or change so that a monster can be declared by given no position
 
 def print_map():
     special = {}
@@ -76,7 +79,11 @@ def print_map():
 
 def User_Interface(): # requests a move command from the user, then prints all objects current positions
     import os
-    os.system('cls') # will clear the screen between turns.
+    import platform
+    if platform.system() == 'Windows':
+        os.system('cls') # will clear the screen between turns on Windows
+    else:
+        os.system('clear') # will clear the screen between turns on Linux or OSX
 
     print_map()
 
@@ -85,40 +92,51 @@ def User_Interface(): # requests a move command from the user, then prints all o
     print(prompt)
     print
 
-    x = raw_input("Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining) :")
-    x = x.upper() # input will accept upper or lower case valid directions
+    #x = raw_input("Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining) :")
+
+    if platform.system() == 'Windows':
+        import msvcrt
+        print "Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining. Q to quit.) : "
+        input_char = msvcrt.getwche()
+    else:
+        input_char = raw_input("Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining. Q to quit.) : ")
+
+    input_char = input_char.upper() # input will accept upper or lower case valid directions
+
     print
-    if x == 'N':
+    if input_char == 'N':
         if not (hero.position[0] - 1, hero.position[1]) in map:
             hero.position = (hero.position[0] - 1, hero.position[1])
             prompt = "You moved."
         else:
             prompt = "There must be a wall there. Lose a turn."
             print
-    elif x == 'S':
+    elif input_char == 'S':
         if not (hero.position[0] + 1, hero.position[1]) in map:
             hero.position = (hero.position[0] + 1, hero.position[1])
             prompt = "You moved."
         else:
             prompt = "There must be a wall there. Lose a turn."
             print
-    elif x == 'E':
+    elif input_char == 'E':
         if not (hero.position[0], hero.position[1] + 1) in map:
             hero.position = (hero.position[0], hero.position[1] + 1)
             prompt = "You moved."
         else:
             prompt = "There must be a wall there. Lose a turn."
             print
-    elif x == 'W':
+    elif input_char == 'W':
         if not (hero.position[0], hero.position[1] - 1) in map:
             hero.position = (hero.position[0], hero.position[1] - 1)
             prompt = "You moved."
         else:
             prompt = "There must be a wall there. Lose a turn."
             print
-    else:
-        prompt = "Can't follow instructions? Lose a turn."
-        print
+    elif input_char == 'Q':
+        print("You have chosen to end the game. Goodbye.")
+        raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
+        import sys
+        sys.exit()
 
     print_map()
 
@@ -133,7 +151,7 @@ def Control_Loop(): #relies on and counts down the turn_count
         turn_count -= 1
     else:
         print("You are out of turns.")
-        raw_input("Press Enter to close game.")
+        raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
 
 Control_Loop() # will begin the program
 
