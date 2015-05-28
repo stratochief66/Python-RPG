@@ -20,7 +20,7 @@ map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7), (2,
 # row 0 through 7
 # column 0 through 8
 
-turn_count = 4 # Behind the scenes turn count control
+turn_count = 15 # Behind the scenes turn count control
 
 prompt = "first turn, good luck!" # initializes prompt
 
@@ -30,15 +30,16 @@ dragon = Monster("dragon", 200, 5, 3, rep_char = 'd', position = (4,5))
 
 def print_map():
     special = {}
+    global special # make special global so that it can be used for combat decisions
     for item in Character:
-        special[item.position] = item.rep_char # need to review the syntax of how this works
+        special[item.position] = item # creates a dictionary of position and creature object for each creature, iterating over all instances of Character
     print
     for row in range(9):
         for column in range(8):
             if (row, column) in map:
                 print "W", # where wall exists, the character W will print
             elif (row, column) in special:
-                print special[(row,column)],
+                print special[(row,column)].rep_char, # by my design, this should return the creature.rep_char ie. bat.rep_char which is b
             else:
                 print " ",
         print("")
@@ -71,6 +72,7 @@ def User_Interface(): # requests a move command from the user, then prints all o
     input_char = input_char.upper() # input will accept upper or lower case valid directions
 
     print
+
     if input_char == 'N':
         if not (hero.position[0] - 1, hero.position[1]) in map:
             hero.position = (hero.position[0] - 1, hero.position[1])
@@ -93,7 +95,9 @@ def User_Interface(): # requests a move command from the user, then prints all o
             prompt = "There must be a wall there. Lose a turn."
             print
     elif input_char == 'W':
-        if not (hero.position[0], hero.position[1] - 1) in map:
+        if (hero.position[0] - 1, hero.position[1]) in special:
+            prompt = "Prepare to fight a thing ", special[(hero.position[0] - 1, hero.position[1])] # change this to %s or whatever syntax to state the enemy, store the enemy then call a combat subroutine.
+        elif not (hero.position[0], hero.position[1] - 1) in map:
             hero.position = (hero.position[0], hero.position[1] - 1)
             prompt = "You moved."
         else:
