@@ -8,58 +8,25 @@ setattr(emp1, 'age', 8) # Set attribute 'age' at 8
 delattr(empl, 'age')    # Delete attribute 'age'
 """
 
-class IterRegistry(type): # borrowed from internet, allows iteration over classes that use this as a metaclass
-    def __iter__(cls):
-        return iter(cls._registry)
-
-class Character(object):
-    __metaclass__ = IterRegistry
-    _registry = []
-
-    entityCount = 0
-
-    def __init__(self, name, rep_char, health = 100, strength = 2, view_range = 2):
-        self._registry.append(self)
-        self.name = name
-        self.health = health
-        self.strength = strength
-        self.view_range = view_range
-        self.rep_char = rep_char
-        self.xp = 0
-        self.position = (4,1)
-        self.number = Character.entityCount
-
-        Character.entityCount += 1
-
-    def display_stats(self):
-        return "This person/object is %s with %s health and represented by %s" % (self.name, self.health, self.rep_char)
-
-class Monster(Character): # subclass of Character. inherits from Character.
-    def __init__(self, name, health = 20, strength = 1, view_range = 2, rep_char = 'b'): # defaults will create a bat
-        self._registry.append(self)
-        self.name = name
-        self.health = health
-        self.strength = strength
-        self.view_range = view_range
-        self.rep_char = rep_char
-        self.xp = False
-        self.position = (4,4)
-        self.number = Character.entityCount
-
-        Character.entityCount += 1
+from characters import Character
+from characters import Monster # seriously, I have to import both classes separately?
+from characters import IterRegistry
 
 map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7), (2,0), (2,7), (3,0), (3,1), (3,3), (3,4), (3,5), (3,7),
     (4,0), (4,3), (4,7), (5,0), (5,1), (5,3), (5,4), (5,5), (5,7), (6,0), (6, 7), (7,0), (7,7), (8,0), (8,1), (8,2), (8,3),
     (8,4), (8,5), (8,6), (8,7)] # a basic test map. maps suck in python, and/or I need a better way to create maps
 
+# map structure:
 # row 0 through 7
 # column 0 through 8
 
+turn_count = 4 # Behind the scenes turn count control
+
+prompt = "first turn, good luck!" # initializes prompt
+
 hero = Character("Kyle", 'K', 100, 2, 4) # overrides the default view range, confirms the other properties.
 bat = Monster("bat")
-dragon = Monster("dragon", 200, 5, 3, rep_char = 'd')
-dragon.position = (4,5)
-# may later include position in declaration parameters, or change so that a monster can be declared by given no position
+dragon = Monster("dragon", 200, 5, 3, rep_char = 'd', position = (4,5))
 
 def print_map():
     special = {}
@@ -140,10 +107,6 @@ def User_Interface(): # requests a move command from the user, then prints all o
 
     print_map()
 
-turn_count = 4 # Behind the scenes turn count control
-
-prompt = "first turn, good luck!"
-
 def Control_Loop(): #relies on and counts down the turn_count
     global turn_count
     while turn_count > 0:
@@ -152,6 +115,7 @@ def Control_Loop(): #relies on and counts down the turn_count
     else:
         print("You are out of turns.")
         raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
+
 
 Control_Loop() # will begin the program
 

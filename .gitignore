@@ -5,6 +5,12 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
+# Python Scratch Pad
+test.py
+
+# PyCharm Structure
+.idea/
+
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
