@@ -20,19 +20,54 @@ wall_map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7)
 # row 0 through 7
 # column 0 through 8
 
-turn_count = 15 # Behind the scenes turn count control
+turn_count = 25 # Behind the scenes turn count control
 
 prompt_text = "first turn, good luck!" # initializes prompt
 
-hero = Character("Kyle", 'K', 100, 2, 4) # overrides the default view range, confirms the other properties.
+hero = Character("Kyle", 'K', 50, 2, 4) # overrides the default view range, confirms the other properties.
 bat = Monster("bat")
-dragon = Monster("dragon", 200, 5, 3, rep_char = 'd', position = (4,5))
+dragon = Monster("dragon", 200, 5, 3, rep_char = 'd', position = (1,5))
+
+def combat(enemy):
+    hero.health -= enemy.strength
+    enemy.health -= hero.strength # v2 both parties take damage proportional to the combatant's strength.
+
+    if hero.health <= 0:
+        print "\nYou have died in glorious combat with a %s." % enemy.name
+        import sys
+        sys.exit()
+    if enemy.health <= 0:
+        hero.xp += 10 # v1, basic XP increase. Should later increase by enemy max health or something.
+
+        prompt_text = "\nYou have killed the fierce %s and now have %s experience!" % (enemy.name, str(hero.xp))
+        print "\nYou have killed the fierce %s and now have %s experience!" % (enemy.name, str(hero.xp))
+
+        kill(enemy)
+
+        # raw_input("test")
+
+def kill(entity):
+    delattr(entity, 'name')
+    delattr(entity, 'health')
+    delattr(entity, 'strength')
+    delattr(entity, 'view_range')
+    delattr(entity, 'rep_char')
+    delattr(entity, 'xp')
+    delattr(entity, 'position')
+    delattr(entity, 'number')
+
+    Character.entityCount -= 1
+
+
+
+
 
 def prompt_decision(location):
     if location in wall_map:
         return "There must be a wall there. Lose a turn.", hero.position
     elif location in special:
-        return "Prepare to fight a %s!" % special[location].name, hero.position
+        combat(special[location])
+        return "Prepare to fight a %s! \nYou have %s health remaining and the enemy has %s." % (special[location].name, hero.health, special[location].health), hero.position
     else:
         return "You moved.", location
 
@@ -67,8 +102,6 @@ def user_interface(): # requests a move command from the user, then prints all o
 
     print(prompt_text)
     print
-
-    #x = raw_input("Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining) :")
 
     if platform.system() == 'Windows':
         import msvcrt
