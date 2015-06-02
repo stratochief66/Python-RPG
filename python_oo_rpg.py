@@ -47,13 +47,17 @@ def combat(enemy):
         so that it is displayed on the next screen refresh loop """
 
 def prompt_decision(location):
+    global prompt_text
     if location in wall_map:
-        return "There must be a wall there. Lose a turn.", hero.position
+        prompt_text += "There must be a wall there. Lose a turn."
+        return hero.position
     elif location in special:
+        prompt_text += "Prepare to fight a %s! \nYou have %s health remaining and the enemy has %s." % (special[location].name, hero.health, special[location].health)
         combat(special[location])
-        return "Prepare to fight a %s! \nYou have %s health remaining and the enemy has %s." % (special[location].name, hero.health, special[location].health), hero.position
+        return hero.position
     else:
-        return "You moved.", location
+        prompt_text += "You moved."
+        return  location
 
 def print_map():
     global special  # make special global so that it can be used for combat decisions
@@ -87,8 +91,9 @@ def user_interface(): # requests a move command from the user, then prints all o
 
     print(prompt_text)
     print
+    prompt_text = ""  # resets prompt_text for next round after it has been displayed
 
-    if platform.system() == 'Windows':
+    if platform.system() == 'Vindows':
         import msvcrt
         print "Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining. Q to quit.) : "
         input_char = msvcrt.getwche()
@@ -100,13 +105,13 @@ def user_interface(): # requests a move command from the user, then prints all o
     print
 
     if input_char == 'N':
-        prompt_text, hero.position = prompt_decision((hero.position[0] - 1, hero.position[1]))
+        hero.position = prompt_decision((hero.position[0] - 1, hero.position[1]))
     elif input_char == 'S':
-        prompt_text, hero.position = prompt_decision((hero.position[0] + 1, hero.position[1]))
+        hero.position = prompt_decision((hero.position[0] + 1, hero.position[1]))
     elif input_char == 'E':
-        prompt_text, hero.position = prompt_decision((hero.position[0], hero.position[1] + 1))
+        hero.position = prompt_decision((hero.position[0], hero.position[1] + 1))
     elif input_char == 'W':
-        prompt_text, hero.position = prompt_decision((hero.position[0], hero.position[1] - 1))
+        hero.position = prompt_decision((hero.position[0], hero.position[1] - 1))
     elif input_char == 'Q':
         print("You have chosen to end the game. Goodbye.")
         raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
