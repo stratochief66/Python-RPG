@@ -8,9 +8,8 @@ setattr(emp1, 'age', 8) # Set attribute 'age' at 8
 delattr(empl, 'age')    # Delete attribute 'age'
 """
 
-from characters import Character
-from characters import Monster # seriously, I have to import both classes separately?
-from characters import IterRegistry
+from characters import *
+from inventory_items import *
 
 wall_map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7), (2,0), (2,7), (3,0), (3,1), (3,3), (3,4), (3,5), (3,7),
     (4,0), (4,3), (4,7), (5,0), (5,1), (5,3), (5,4), (5,5), (5,7), (6,0), (6, 7), (7,0), (7,7), (8,0), (8,1), (8,2), (8,3),
@@ -20,19 +19,24 @@ wall_map = [(0,0), (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (1,0), (1,7)
 # row 0 through 7
 # column 0 through 8
 
-turn_count = 25 # Behind the scenes turn count control
+turn_count = 25  # Behind the scenes turn count control
 
 prompt_text = "first turn, good luck!"  # initializes prompt
 
 special = {}
 
 hero = Character("Kyle", 'K', 50, 2, 4)  # overrides the default view range, confirms the other properties.
+
+knife = InvWeapon("knife", "Used against enemies", 1, 'w', position=(7, 2), attack=1)
+
 bat = Monster("bat")
-dragon = Monster("dragon", 200, 5, 3, rep_char='d', position=(1,5))
+dragon = Monster("dragon", 200, 5, 3, rep_char='d', position=(1, 5))
 
 def combat(enemy):
     hero.health -= enemy.strength
     enemy.health -= hero.strength  # v2 both parties take damage proportional to the combatant's strength.
+    if knife in hero.inventory:
+        enemy.health -= knife.attack
 
     if hero.health <= 0:
         print "\nYou have died in glorious combat with a %s." % enemy.name
@@ -52,9 +56,15 @@ def prompt_decision(location):
         prompt_text += "There must be a wall there. Lose a turn."
         return hero.position
     elif location in special:
-        prompt_text += "Prepare to fight a %s! \nYou have %s health remaining and the enemy has %s." % (special[location].name, hero.health, special[location].health)
-        combat(special[location])
-        return hero.position
+        if type(special[location]) == Monster:  # if you have bumped into a monster
+            prompt_text += "Prepare to fight a %s! \nYou have %s health remaining and the enemy has %s." % (special[location].name, hero.health, special[location].health)
+            combat(special[location])
+            return hero.position
+        else:
+            prompt_text += "You have found a %s and picked it up." % special[location].name
+            hero.inventory.append(special[location])
+            special[location].position = ()
+            return hero.position
     else:
         prompt_text += "You moved."
         return  location
@@ -62,10 +72,17 @@ def prompt_decision(location):
 def print_map():
     global special  # make special global so that it can be used for combat decisions
     special = {}
+
     for item in Character:
         if item.health > 0:
-            special[item.position] = item # dictionary, location : creature
+            special[item.position] = item  # dictionary, location : creature
+
+    for thing in InvItem:
+        if not thing.position == ():  # objects in inventories will have null positions
+            special[thing.position] = thing
+
     print
+
     for row in range(9):
         for column in range(8):
             if (row, column) in wall_map:
@@ -93,7 +110,7 @@ def user_interface(): # requests a move command from the user, then prints all o
     print
     prompt_text = ""  # resets prompt_text for next round after it has been displayed
 
-    if platform.system() == 'Vindows':
+    if platform.system() == 'Windows':
         import msvcrt
         print "Which direction would you like to move in? <N E S W>  (" + str(turn_count) + " turns remaining. Q to quit.) : "
         input_char = msvcrt.getwche()
@@ -114,7 +131,7 @@ def user_interface(): # requests a move command from the user, then prints all o
         hero.position = prompt_decision((hero.position[0], hero.position[1] - 1))
     elif input_char == 'Q':
         print("You have chosen to end the game. Goodbye.")
-        raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
+        raw_input("Press Enter to close game.")  # intended to give the user a chance to review the screen before exiting
         import sys
         sys.exit()
 
@@ -127,7 +144,7 @@ def control_loop():  # relies on and counts down the turn_count
         turn_count -= 1
     else:
         print("You are out of turns.")
-        raw_input("Press Enter to close game.") # intended to give the user a chance to review the screen before exiting
+        raw_input("Press Enter to close game.")  # intended to give the user a chance to review the screen before exiting
 
 
 control_loop() # will begin the program
