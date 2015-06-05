@@ -24,6 +24,7 @@ class Character(object):
 
 class Monster(Character): # subclass of Character. inherits from Character.
     def __init__(self, name, health = 20, strength = 1, view_range = 2, rep_char = 'b', position = (4,4)):  # default is bat
+        self._registry.append(self)
         self.name = name
         self.health = health
         self.strength = strength
