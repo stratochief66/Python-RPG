@@ -2,16 +2,14 @@ __author__ = 'Kyle_Laskowski'
 
 class PromptText(object):
 
-    def __init__(self):
-        self.contents = "Initializing string"
+    contents = "First turn, good luck!"
 
-    def print_out(self):
-        print self.contents
-        self.contents = ""
+    @staticmethod
+    def print_out():
+        print PromptText.contents
+        PromptText.contents = ""
 
-    def add_to(self, text_to_add):
-        self.contents += "\n"
-        self.contents += str(text_to_add)
-
-    def __repr__(self):
-        return "I am the string used to store the prompt text."
+    @classmethod
+    def add_to(cls, text_to_add):
+        PromptText.contents += "\n"
+        PromptText.contents += str(text_to_add)

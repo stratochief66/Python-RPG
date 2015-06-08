@@ -4,6 +4,19 @@ class IterRegistry(type): # borrowed from internet, allows iteration over classe
     def __iter__(cls):
         return iter(cls._registry)
 
+class ObjectClass(object):
+    __metaclass__ = IterRegistry
+    registry = []
+
+    def __init__(self, name, rep_char, position):
+        self.registry.append(self)
+        self.name = name
+        self.rep_char = rep_char
+        self.position = position
+
+# below this will be deprecated
+
+
 class Character(object):
     __metaclass__ = IterRegistry
     _registry = []
@@ -32,3 +45,24 @@ class Monster(Character): # subclass of Character. inherits from Character.
         self.rep_char = rep_char
         self.xp = False
         self.position = position
+
+class InvItem(object):
+    __metaclass__ = IterRegistry
+    _registry = []
+
+    entityCount = 0
+
+    def __init__(self, name, description, weight, rep_char, position, cost=10):  # future, add rep_char & rep_colour
+        self._registry.append(self)
+        self.name = name
+        self.description = description
+        self.weight = weight
+        self.rep_char = rep_char
+        self.position = position
+        self.cost = cost
+
+class InvWeapon(InvItem):
+
+    def __init__(self, name, description, weight, rep_char, position, attack, cost=20):
+        InvItem.__init__(self, name, description, weight, rep_char, position, cost)  # can I save on repetition here?
+        self.attack = attack
